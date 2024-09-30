@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>Таймер</title>
+</head>
+<body>
+<audio id="notification-sound" src="notification.mp3"></audio>
+
+<header class="header">
+  <div class="menu__inner">
+    <nav class="menu__nav">
+      <ul class="menu__list">
+        <li class="menu__item">
+          <button id="info-btn" class="menu__icon-btn" title="О проекте">
+            <svg class="svg-btn" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="1.5" d="M2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22c4.714 0 7.071 0 8.535-1.465C22 19.072 22 16.714 22 12v-1.5M13.5 2H12C7.286 2 4.929 2 3.464 3.464c-.973.974-1.3 2.343-1.409 4.536"/><circle cx="19" cy="5" r="3" stroke-width="1.5"/></svg>
+          </button>
+        </li>
+        <li class="menu__item">
+          <button id="skip-btn" class="menu__icon-btn" title="Пропустить текущий таймер">
+              <svg class="svg-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-width="1.5" d="M2 11v7.967c0 2.31 2.134 3.769 3.87 2.648l10.79-6.968c1.787-1.154 1.787-4.14 0-5.294L5.87 2.385C4.135 1.264 2 2.724 2 5.033V7M22 5v7m0 4v3"/>
+              </svg>
+          </button>
+        </li>
+        <li class="menu__item">
+          <button id="settings-btn" class="menu__icon-btn" title="Настройки">
+            <svg class="svg-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"  stroke-width="1.5"/><path stroke-linecap="round" stroke-width="1.5" d="M3.661 10.64c.473.296.777.802.777 1.36s-.304 1.064-.777 1.36c-.321.203-.529.364-.676.556a2 2 0 0 0-.396 1.479c.052.394.285.798.75 1.605.467.807.7 1.21 1.015 1.453a2 2 0 0 0 1.479.396c.24-.032.483-.13.819-.308a1.617 1.617 0 0 1 1.567.008c.483.28.77.795.79 1.353.014.38.05.64.143.863a2 2 0 0 0 1.083 1.083C10.602 22 11.068 22 12 22c.932 0 1.398 0 1.765-.152a2 2 0 0 0 1.083-1.083c.092-.223.129-.483.143-.863.02-.558.307-1.074.79-1.353a1.617 1.617 0 0 1 1.567-.008c.336.178.58.276.82.308a2 2 0 0 0 1.478-.396c.315-.242.548-.646 1.014-1.453.208-.36.369-.639.489-.873m-.81-2.766a1.617 1.617 0 0 1-.777-1.36c0-.559.304-1.065.777-1.362.321-.202.528-.363.676-.555a2 2 0 0 0 .396-1.479c-.052-.394-.285-.798-.75-1.605-.467-.807-.7-1.21-1.015-1.453a2 2 0 0 0-1.479-.396c-.24.032-.483.13-.82.308a1.617 1.617 0 0 1-1.566-.008 1.617 1.617 0 0 1-.79-1.353c-.014-.38-.05-.64-.143-.863a2 2 0 0 0-1.083-1.083C13.398 2 12.932 2 12 2c-.932 0-1.398 0-1.765.152a2 2 0 0 0-1.083 1.083c-.092.223-.129.483-.143.863a1.617 1.617 0 0 1-.79 1.353 1.617 1.617 0 0 1-1.567.008c-.336-.178-.58-.276-.82-.308a2 2 0 0 0-1.478.396C4.04 5.79 3.806 6.193 3.34 7c-.208.36-.369.639-.489.873"/></svg>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="timer">
+  <div class="time">00:00</div>
+  <div class="time text"></div>
+  <div class="marker"></div>
+</div> 
+<div class="circle__inner">
+  <div class="circle">
+    <span class="circle__btn">
+      <div class="play" name="play">
+        <svg class="svg-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24"><path  stroke-linecap="round" stroke-width="1.5" d="M3 12v6.967c0 2.31 2.534 3.769 4.597 2.648l3.203-1.742M3 8V5.033c0-2.31 2.534-3.769 4.597-2.648l12.812 6.968a2.998 2.998 0 0 1 0 5.294l-6.406 3.484"/></svg>
+      </div>
+      <div class="pause" name="pause">
+        <svg class="svg-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="1.5" d="M2 18c0 1.886 0 2.828.586 3.414C3.172 22 4.114 22 6 22c1.886 0 2.828 0 3.414-.586C10 20.828 10 19.886 10 18V6c0-1.886 0-2.828-.586-3.414C8.828 2 7.886 2 6 2c-1.886 0-2.828 0-3.414.586C2 3.172 2 4.114 2 6v8M22 6c0-1.886 0-2.828-.586-3.414C20.828 2 19.886 2 18 2c-1.886 0-2.828 0-3.414.586C14 3.172 14 4.114 14 6v12c0 1.886 0 2.828.586 3.414C15.172 22 16.114 22 18 22c1.886 0 2.828 0 3.414-.586C22 20.828 22 19.886 22 18v-8"/></svg>
+      </div>
+    </span>
+    <span class="circle__back-1 paused"></span>
+    <span class="circle__back-2 paused"></span>    
+  </div>
+</div>
+<!-- MODAL INFO -->
+<div class="overlay hidden" id="overlay">
+  <div id="modalInfo" class="modal hidden">
+      <button id="close-modal-btn" class="close-btn">
+        <svg class="modal-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 16-4-4m0 0L8 8m4 4 4-4m-4 4-4 4"/></svg>
+      </button>
+      <div class="modal-content">
+        <p class="modal-text">
+          Помидорчатый таймер — это метод тайм-менеджмента, который помогает улучшить продуктивность.
+        </br></br>
+          Выберите задачу для работы, Сосредоточьтесь на ней в течение 25 минут, 
+        а затем сделайте 5-минутный перерыв, чтобы дать мозгу отдохнуть - заварите чай, разомнитесь. 
+        Повторите этот цикл несколько раз, после чего сделайте длинный перерыв.
+        </p>      
+    </div>
+  </div>
+</div>
+<!-- MODAL SETTINGS -->
+<div id="modalSettings" class="modalTwo hidden">
+  <button id="close-modal-two" class="close-btn">
+    <svg class="modal-btn" xmlns="http://www.w3.org/2000/svg" width="800" height="800" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 16-4-4m0 0L8 8m4 4 4-4m-4 4-4 4"/></svg>
+  </button>
+  <div class="modal-content">
+    <div class="modal-text-settings">
+      <p class="modal-text modal-title">Настройки таймера</p>
+      <section>
+        <label>Рабочее время:</label>
+        <button class="decrease" data-type="workTime">-</button>
+        <span id="workTime">25</span>
+        <button class="increase" data-type="workTime">+</button>
+      </section>
+      <section>
+        <label>Маленький перерыв:</label>
+        <button class="decrease" data-type="shortBreak">-</button>
+        <span id="shortBreak">5</span> 
+        <button class="increase" data-type="shortBreak">+</button>
+      </section>
+      <section>
+        <label>Большой перерыв:</label>
+        <button class="decrease" data-type="longBreak">-</button>
+        <span id="longBreak">20</span> 
+        <button class="increase" data-type="longBreak">+</button>
+      </section>
+      <section>
+        <label>Циклы до большого перерыва:</label>
+        <button class="decrease" data-type="cycles">-</button>
+        <span id="cycles">4</span>
+        <button class="increase" data-type="cycles">+</button>
+      </section>
+    </div>
+  </div>
+</div>
+</main>
+<script src="script.js" defer></script>
+</body>
+</html>
