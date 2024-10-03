@@ -22,6 +22,10 @@
   .modal {
     padding: 15px;
   }
+
+  .text.show {
+    transform: translateY(-8px);
+  }
 }
 
 :root {
