@@ -24,7 +24,7 @@
   }
 
   .text.show {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
 }
 
