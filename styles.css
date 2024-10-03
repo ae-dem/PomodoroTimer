@@ -26,6 +26,10 @@
   .text.show {
     transform: translateY(-10px);
   }
+
+  body {
+    overflow: hidden;
+  }
 }
 
 :root {
