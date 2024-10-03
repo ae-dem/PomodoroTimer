@@ -44,8 +44,14 @@
   --font-family: 'Montserrat Alternates', arial;
 }
 
+html,
 body {
-  overflow:hidden;
+  overflow-x: hidden;
+  height: 100%;
+}
+
+body {
+  position: relative;
   flex-direction: column;
   align-items: center;
   justify-content: center;
