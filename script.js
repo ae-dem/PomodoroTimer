@@ -205,3 +205,27 @@ overlay.addEventListener('click', () => {
     overlay.classList.add('hidden');
   }, 500);
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('theme-btn');
+    const body = document.body;
+    const root = document.documentElement;
+    const saved = localStorage.getItem('theme') || 'light';
+    
+    // Применяем сохраненную тему
+    root.setAttribute('data-theme', saved);
+    if (saved === 'dark') {
+        body.classList.add('dark-theme');
+    }
+
+    btn.addEventListener('click', () => {
+        const currentTheme = root.getAttribute('data-theme');
+        const next = currentTheme === 'light' ? 'dark' : 'light';
+        
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        
+        // Переключаем CSS-класс для body
+        body.classList.toggle('dark-theme', next === 'dark');
+    });
+});
