@@ -16,6 +16,11 @@
     font-size: 14px; 
   }
 
+  .theme-icon {
+    width: 30px;
+    height: 30px;
+  }
+
   .modal-content {
     padding-inline: 5px;
   }
