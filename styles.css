@@ -528,9 +528,9 @@ body.dark-theme {
   display: block;
 }
 :root[data-theme='light'] .theme-icon {
-  --icon-image: url('/assets/svg/moon.svg');
+  --icon-image: url('assets/svg/moon.svg');
 }
 
 :root[data-theme='dark'] .theme-icon {
-  --icon-image: url('/assets/svg/sun.svg');
+  --icon-image: url('assets/svg/sun.svg');
 }
