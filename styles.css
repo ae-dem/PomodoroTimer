@@ -8,6 +8,7 @@
   background: var(--greyLight-1);
   font-size: 16px;
   -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s !important;
 }
 
 @media (max-width: 660px) {
@@ -80,6 +81,7 @@ body {
 
   border-radius: 0 0 25px 25px;
   box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+  
 }
 
 .menu__icon-btn {
@@ -97,6 +99,7 @@ body {
   stroke: var(--icons-color);
   display: block; 
   transition: transform 0.5s;
+  
 }
 
 .svg-btn--star {
@@ -105,6 +108,7 @@ body {
   fill: var(--icons-color);
   display: block; 
   transition: transform 0.5s;
+  
 }
 
 .svg-btn:hover {
@@ -123,6 +127,7 @@ body {
   display: block; 
   top: 0;
   right: 0;
+  
 }
 
 .timer {
@@ -137,6 +142,7 @@ body {
   box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), 
               -0.2rem -0.2rem 0.5rem var(--white);
   margin-bottom: 75px;
+  
 }
 
 .time {
@@ -144,6 +150,7 @@ body {
   z-index: 300;
   color: var(--icons-color);
   font-size: 2.15rem;
+  
 }
 
 .text {
@@ -167,6 +174,7 @@ body {
   position: relative;
   box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), 
               inset -0.2rem -0.2rem 0.5rem var(--white);
+  
 }
 
 .circle__inner {
@@ -206,10 +214,12 @@ body {
   box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
   cursor: pointer;
   position: relative;
+  
 }
 
 .circle__btn.shadow {
   box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+  
 }
 
 .circle__btn .pause {
@@ -244,6 +254,7 @@ body {
 }
 
 .circle__back-1 {
+    transition: all 0.2s ;
   box-shadow: 0.4rem 0.4rem 0.8rem var(--greyLight-2), -0.4rem -0.4rem 0.8rem var(--white);
   background: linear-gradient(to bottom right, var(--greyLight-2) 0%, var(--white) 100%);
   -webkit-animation: waves 4s linear infinite;
@@ -299,7 +310,7 @@ body {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -62%);
   width: 75%;
   max-width: 475px;
   max-height: fit-content;
@@ -477,7 +488,7 @@ body.dark-theme {
   --greyLight-1: #232526;
   --greyLight-2: #161416;
   --greyLight-3: #20222452;
-  --white: #737a7d4d;
+  --white: #484a4c;
   --text-color: #E9E9E9;
   --icons-color: #a9a9a9;
   --icons-accent: #ededed;
