@@ -1,231 +1,281 @@
-const timeDisplay = document.querySelector('.time');
-const playBtn = document.querySelector('.circle__btn');
-const skipBtn = document.getElementById('skip-btn');
-const play = document.querySelector('.play');
-const pause = document.querySelector('.pause');
-const wave1 = document.querySelector('.circle__back-1');
-const wave2 = document.querySelector('.circle__back-2');
-const breakText = document.querySelector('.time.text');
-
-let isRunning = false;
-let timer;
-let currentSession = 'work';
-let pomodoroCount = 0;
-
-let workTime = localStorage.getItem('workTime') ? parseInt(localStorage.getItem('workTime')) : 25 * 60;
-let shortBreak = localStorage.getItem('shortBreak') ? parseInt(localStorage.getItem('shortBreak')) : 5 * 60;
-let longBreak = localStorage.getItem('longBreak') ? parseInt(localStorage.getItem('longBreak')) : 20 * 60;
-let cycles = localStorage.getItem('cycles') ? parseInt(localStorage.getItem('cycles')) : 4;
-let timeLeft = workTime;
-
-const modal = document.getElementById('modalSettings');
-const settingsBtn = document.getElementById('settings-btn');
-const overlay = document.getElementById('overlay');
-const closeModalTwo = document.getElementById('close-modal-two');
-
-settingsBtn.addEventListener('click', () => {
-  updateModalSettings();
-  modal.classList.remove('hidden', 'modal-hidden');
-  overlay.classList.remove('hidden', 'overlay-hidden');
+const DEFAULTS = Object.freeze({
+  WORK_TIME: 25 * 60,
+  SHORT_BREAK: 5 * 60,
+  LONG_BREAK: 20 * 60,
+  CYCLES: 4,
+  STEP: 300
 });
 
-closeModalTwo.addEventListener('click', () => {
-  modal.classList.add('modal-hidden');
-  overlay.classList.add('overlay-hidden');
-  setTimeout(() => {
-    modal.classList.add('hidden');
-    overlay.classList.add('hidden');
-  }, 500); 
+const SESSIONS = Object.freeze({
+  WORK: 'work',
+  SHORT_BREAK: 'shortBreak',
+  LONG_BREAK: 'longBreak'
 });
 
-function updateModalSettings() {
-  document.getElementById('workTime').textContent = workTime / 60;
-  document.getElementById('shortBreak').textContent = shortBreak / 60;
-  document.getElementById('longBreak').textContent = longBreak / 60;
-  document.getElementById('cycles').textContent = cycles;
-}
-
-document.querySelectorAll('.increase, .decrease').forEach(button => {
-  button.addEventListener('click', function () {
-    const type = this.getAttribute('data-type');
-    const isIncrease = this.classList.contains('increase');
-    adjustTime(type, isIncrease);
-  });
+const LABELS = Object.freeze({
+  BREAK: 'Отдых',
+  TITLE_SUFFIX: ' - Таймер'
 });
 
-function adjustTime(type, isIncrease) {
-  let value;
-  switch (type) {
-    case 'workTime':
-      value = isIncrease ? (workTime += 300) : (workTime = Math.max(workTime - 300, 25 * 60));
-      localStorage.setItem('workTime', workTime);
-      if (!isRunning) timeLeft = workTime;
-      break;
-    case 'shortBreak':
-      value = isIncrease ? (shortBreak += 300) : (shortBreak = Math.max(shortBreak - 300, 5 * 60));
-      localStorage.setItem('shortBreak', shortBreak);
-      break;
-    case 'longBreak':
-      value = isIncrease ? (longBreak += 300) : (longBreak = Math.max(longBreak - 300, 15 * 60));
-      localStorage.setItem('longBreak', longBreak);
-      break;
-    case 'cycles':
-      value = isIncrease ? (cycles += 1) : (cycles = Math.max(cycles - 1, 2));
-      localStorage.setItem('cycles', cycles); 
-      break;
+class Pomodoro {
+  constructor() {
+    this.el = {
+      timeDisplay: document.querySelector('.timer__display'),
+      playBtn: document.querySelector('.controls__btn'),
+      skipBtn: document.getElementById('skip-btn'),
+      playIcon: document.querySelector('.controls__play'),
+      pauseIcon: document.querySelector('.controls__pause'),
+      waves: [
+        document.querySelector('.controls__wave--first'),
+        document.querySelector('.controls__wave--second')
+      ],
+      breakText: document.querySelector('.timer__status'),
+      notificationSound: document.getElementById('notification-sound'),
+      modalSettings: document.getElementById('modalSettings'),
+      settingsBtn: document.getElementById('settings-btn'),
+      modalInfo: document.getElementById('modalInfo'),
+      infoBtn: document.getElementById('info-btn'),
+      overlay: document.getElementById('overlay'),
+      closeModalTwo: document.getElementById('close-modal-two'),
+      closeModalBtn: document.getElementById('close-modal-btn'),
+      themeBtn: document.getElementById('theme-btn')
+    };
+
+    this.defaults = {
+      workTime: DEFAULTS.WORK_TIME,
+      shortBreak: DEFAULTS.SHORT_BREAK,
+      longBreak: DEFAULTS.LONG_BREAK,
+      cycles: DEFAULTS.CYCLES
+    };
+
+    this.state = {
+      isRunning: false,
+      timerId: null,
+      currentSession: SESSIONS.WORK,
+      pomodoroCount: 0,
+      workTime: this.loadNumber('workTime', this.defaults.workTime),
+      shortBreak: this.loadNumber('shortBreak', this.defaults.shortBreak),
+      longBreak: this.loadNumber('longBreak', this.defaults.longBreak),
+      cycles: this.loadNumber('cycles', this.defaults.cycles),
+      timeLeft: null
+    };
+
+    this.state.timeLeft = this.state.workTime;
+    this.init();
   }
-  updateModalSettings();  
-  updateTimeDisplay(timeLeft);
-}
 
-function toggleButton() {
-  pause.classList.toggle('visibility');
-  play.classList.toggle('visibility');
-  playBtn.classList.toggle('shadow');
-  wave1.classList.toggle('paused');
-  wave2.classList.toggle('paused');
-}
-
-function showText() {
-  if (currentSession === 'shortBreak' || currentSession === 'longBreak') {
-    breakText.textContent = 'Отдых';
-    breakText.style.display = 'block';
-    breakText.classList.add('show');
+  loadNumber(key, fallback) {
+    const v = localStorage.getItem(key);
+    return v ? parseInt(v, 10) : fallback;
   }
-}
 
-function hideText() {
-  breakText.classList.remove('show');
-}
-
-function updateTimeDisplay(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  const timeString = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-  
-  timeDisplay.textContent = timeString;
-  document.title = `${timeString} - Таймер`;
-}
-
-function startTimer(duration) {
-  let time = duration;
-  updateTimeDisplay(time);
-  timer = setInterval(() => {
-    if (time <= 0) {
-      clearInterval(timer);
-      handleSessionEnd();
-    } else {
-      time--;
-      timeLeft = time;
-      updateTimeDisplay(time);
-    }
-  }, 1000);
-}
-
-const notificationSound = document.getElementById('notification-sound');
-
-function playNotification() {
-  notificationSound.play();
-}
-
-function handleSessionEnd() {
-  playNotification(); 
-  if (currentSession === 'work') {
-    pomodoroCount++;
-    if (pomodoroCount % cycles === 0) {
-      currentSession = 'longBreak';
-      timeLeft = longBreak;
-      showText();
-    } else {
-      currentSession = 'shortBreak';
-      timeLeft = shortBreak;
-      showText();
-    }
-  } else {
-    currentSession = 'work';
-    timeLeft = workTime;
-    hideText();
+  saveNumber(key, value) {
+    localStorage.setItem(key, String(value));
   }
-  startTimer(timeLeft);
-}
 
-function toggleTimer() {
-  if (!isRunning) {
-    startTimer(timeLeft);
-    toggleButton();
-    isRunning = true;
-  } else {
-    clearInterval(timer);
-    toggleButton();
-    isRunning = false;
+  init() {
+    this.updateDisplay(this.state.timeLeft);
+    this.bindControls();
+    this.setupTheme();
   }
-}
 
-function skipCurrentSession() {
-  clearInterval(timer);
-  handleSessionEnd();
+  bindControls() {
+    if (this.el.playBtn) this.el.playBtn.addEventListener('click', () => this.toggleTimer());
+    if (this.el.skipBtn) this.el.skipBtn.addEventListener('click', () => this.skipSession());
 
-  if (!isRunning) {
-    toggleButton();
-    isRunning = true;
-  }
-}
-
-playBtn.addEventListener('click', toggleTimer);
-skipBtn.addEventListener('click', skipCurrentSession);
-
-updateTimeDisplay(timeLeft);
-
-const closeModalBtn = document.getElementById('close-modal-btn');
-const infoBtn = document.getElementById('info-btn');
-const modalInfo = document.getElementById('modalInfo');
-
-infoBtn.addEventListener('click', () => {
-  modalInfo.classList.remove('hidden', 'modal-hidden');
-  overlay.classList.remove('hidden', 'overlay-hidden');
-});
-
-closeModalBtn.addEventListener('click', () => {
-  modalInfo.classList.add('modal-hidden');
-  overlay.classList.add('overlay-hidden');
-  setTimeout(() => {
-    modalInfo.classList.add('hidden');
-    overlay.classList.add('hidden');
-  }, 500);
-});
-
-overlay.addEventListener('click', () => {
-  modal.classList.add('modal-hidden');
-  modalInfo.classList.add('modal-hidden');
-  overlay.classList.add('overlay-hidden');
-
-  setTimeout(() => {
-    modal.classList.add('hidden');
-    modalInfo.classList.add('hidden');
-    overlay.classList.add('hidden');
-  }, 500);
-});
-
-window.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('theme-btn');
-    const body = document.body;
-    const root = document.documentElement;
-    const saved = localStorage.getItem('theme') || 'light';
-    
-    // Применяем сохраненную тему
-    root.setAttribute('data-theme', saved);
-    if (saved === 'dark') {
-        body.classList.add('dark-theme');
-    }
-
-    btn.addEventListener('click', () => {
-        const currentTheme = root.getAttribute('data-theme');
-        const next = currentTheme === 'light' ? 'dark' : 'light';
-        
-        root.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        
-        // Переключаем CSS-класс для body
-        body.classList.toggle('dark-theme', next === 'dark');
+    document.querySelectorAll('.settings__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-type');
+        const isIncrease = btn.classList.contains('increase');
+        this.adjustTime(type, isIncrease);
+      });
     });
+
+    if (this.el.infoBtn) this.el.infoBtn.addEventListener('click', () => this.openModal(this.el.modalInfo));
+    if (this.el.settingsBtn) this.el.settingsBtn.addEventListener('click', () => { this.updateModalSettings(); this.openModal(this.el.modalSettings); });
+    if (this.el.closeModalTwo) this.el.closeModalTwo.addEventListener('click', () => this.closeModal(this.el.modalSettings));
+    if (this.el.closeModalBtn) this.el.closeModalBtn.addEventListener('click', () => this.closeModal(this.el.modalInfo));
+    if (this.el.overlay) this.el.overlay.addEventListener('click', () => { this.closeModal(this.el.modalInfo); this.closeModal(this.el.modalSettings); });
+
+    [this.el.modalInfo, this.el.modalSettings].forEach(m => {
+      if (m) m.addEventListener('click', (e) => e.stopPropagation());
+    });
+  }
+
+  setupTheme() {
+    const btn = this.el.themeBtn;
+    const root = document.documentElement;
+    const body = document.body;
+    const saved = localStorage.getItem('theme') || 'light';
+    root.setAttribute('data-theme', saved);
+    if (saved === 'dark') body.classList.add('dark-theme');
+    if (btn) btn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme') || 'light';
+      const next = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      body.classList.toggle('dark-theme', next === 'dark');
+    });
+  }
+
+  openModal(modal) {
+    if (!modal || !this.el.overlay) return;
+    modal.classList.remove('hidden', 'modal-hidden');
+    this.el.overlay.classList.remove('hidden', 'overlay-hidden');
+  }
+
+  closeModal(modal) {
+    if (!modal || !this.el.overlay) return;
+    modal.classList.add('modal-hidden');
+    this.el.overlay.classList.add('overlay-hidden');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      this.el.overlay.classList.add('hidden');
+    }, 500);
+  }
+
+  updateModalSettings() {
+    const w = Math.floor(this.state.workTime / 60);
+    const s = Math.floor(this.state.shortBreak / 60);
+    const l = Math.floor(this.state.longBreak / 60);
+    const c = this.state.cycles;
+    const el = (id) => document.getElementById(id);
+    if (el('workTime')) el('workTime').textContent = w;
+    if (el('shortBreak')) el('shortBreak').textContent = s;
+    if (el('longBreak')) el('longBreak').textContent = l;
+    if (el('cycles')) el('cycles').textContent = c;
+  }
+
+  adjustTime(type, increase) {
+    const step = DEFAULTS.STEP;
+    switch (type) {
+      case 'workTime':
+        this.state.workTime = increase ? this.state.workTime + step : Math.max(this.state.workTime - step, this.defaults.workTime);
+        this.saveNumber('workTime', this.state.workTime);
+        if (!this.state.isRunning) this.state.timeLeft = this.state.workTime;
+        break;
+      case 'shortBreak':
+        this.state.shortBreak = increase ? this.state.shortBreak + step : Math.max(this.state.shortBreak - step, this.defaults.shortBreak);
+        this.saveNumber('shortBreak', this.state.shortBreak);
+        break;
+      case 'longBreak':
+        this.state.longBreak = increase ? this.state.longBreak + step : Math.max(this.state.longBreak - step, 15 * 60);
+        this.saveNumber('longBreak', this.state.longBreak);
+        break;
+      case 'cycles':
+        this.state.cycles = increase ? this.state.cycles + 1 : Math.max(this.state.cycles - 1, 2);
+        this.saveNumber('cycles', this.state.cycles);
+        break;
+    }
+    this.updateModalSettings();
+    this.updateDisplay(this.state.timeLeft);
+  }
+
+  formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  updateDisplay(seconds) {
+    const t = this.formatTime(seconds);
+    if (this.el.timeDisplay) this.el.timeDisplay.textContent = t;
+    document.title =`${t}${LABELS.TITLE_SUFFIX}`;
+  }
+
+  toggleUI() {
+    if (!this.el.playBtn) return;
+    this.el.pauseIcon.classList.toggle('visibility');
+    this.el.playIcon.classList.toggle('visibility');
+    this.el.playBtn.classList.toggle('shadow');
+    this.el.waves.forEach(w => w && w.classList.toggle('paused'));
+  }
+
+  startTimer(duration) {
+    this.clearTimer();
+    let time = duration;
+    this.updateDisplay(time);
+    this.state.timerId = setInterval(() => {
+      if (time <= 0) {
+        this.clearTimer();
+        this.handleSessionEnd();
+      } else {
+        time--;
+        this.state.timeLeft = time;
+        this.updateDisplay(time);
+      }
+    }, 1000);
+  }
+
+  clearTimer() {
+    if (this.state.timerId) {
+      clearInterval(this.state.timerId);
+      this.state.timerId = null;
+    }
+  }
+
+  playNotification() {
+    const s = this.el.notificationSound;
+    if (s && typeof s.play === 'function') s.play();
+  }
+
+  showBreakText() {
+    if (!this.el.breakText) return;
+    if (this.state.currentSession === SESSIONS.SHORT_BREAK || this.state.currentSession === SESSIONS.LONG_BREAK) {
+      this.el.breakText.textContent = LABELS.BREAK;
+      this.el.breakText.style.display = 'block';
+      requestAnimationFrame(() => this.el.breakText.classList.add('show'));
+    }
+  }
+
+  hideBreakText() {
+    if (!this.el.breakText) return;
+    this.el.breakText.classList.remove('show');
+    setTimeout(() => { this.el.breakText.style.display = 'none'; }, 360);
+  }
+
+  handleSessionEnd() {
+    this.playNotification();
+    if (this.state.currentSession === SESSIONS.WORK) {
+      this.state.pomodoroCount++;
+      if (this.state.pomodoroCount % this.state.cycles === 0) {
+        this.state.currentSession = SESSIONS.LONG_BREAK;
+        this.state.timeLeft = this.state.longBreak;
+      } else {
+        this.state.currentSession = SESSIONS.SHORT_BREAK;
+        this.state.timeLeft = this.state.shortBreak;
+      }
+      this.showBreakText();
+    } else {
+      this.state.currentSession = SESSIONS.WORK;
+      this.state.timeLeft = this.state.workTime;
+      this.hideBreakText();
+    }
+    this.startTimer(this.state.timeLeft);
+  }
+
+  toggleTimer() {
+    if (!this.state.isRunning) {
+      this.startTimer(this.state.timeLeft);
+      this.toggleUI();
+      this.state.isRunning = true;
+    } else {
+      this.clearTimer();
+      this.toggleUI();
+      this.state.isRunning = false;
+    }
+  }
+
+  skipSession() {
+    this.clearTimer();
+    this.handleSessionEnd();
+    if (!this.state.isRunning) {
+      this.toggleUI();
+      this.state.isRunning = true;
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  new Pomodoro();
 });
