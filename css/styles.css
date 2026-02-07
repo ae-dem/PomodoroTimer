@@ -398,8 +398,8 @@ body {
   height: 38px;
   display: inline-block;
   background-color: var(--icons-color);
-  -webkit-mask: url('assets/svg/social-telegram.svg') no-repeat center;
-  mask: url('assets/svg/social-telegram.svg') no-repeat center;
+  -webkit-mask: url('../assets/svg/social-telegram.svg') no-repeat center;
+  mask: url('../assets/svg/social-telegram.svg') no-repeat center;
   -webkit-mask-size: contain;
   mask-size: contain;
   transition: background-color 0.3s ease;
@@ -509,11 +509,11 @@ body.dark-theme {
   display: block;
 }
 :root[data-theme='light'] .theme-icon {
-  --icon-image: url('assets/svg/moon.svg');
+  --icon-image: url('../assets/svg/moon.svg');
 }
 
 :root[data-theme='dark'] .theme-icon {
-  --icon-image: url('assets/svg/sun.svg');
+  --icon-image: url('../assets/svg/sun.svg');
 }
 
 @media (max-width: 660px) {
